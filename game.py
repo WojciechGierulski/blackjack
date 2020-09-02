@@ -6,6 +6,7 @@ from game_params import GameParams, cursor_in_rect
 from menu import Button, GameButton, BetButton
 import random
 from dealerturn import DealerTurn
+from counting import determine_score
 
 
 class Stack:
@@ -154,6 +155,22 @@ class Game:
             for card in self.dealer.additional_cards:
                 card.draw()
 
+    def draw_score(self):
+        try:
+            if self.dealer.hidden_card_is_visible:
+                dealer_score = determine_score(
+                    [self.dealer.visible_card, self.dealer.hidden_card] + self.dealer.additional_cards)
+            else:
+                dealer_score = determine_score([self.dealer.visible_card])
+            player_score = determine_score([self.player.card1, self.player.card2] + self.player.additional_cards)
+        except:
+            dealer_score = 0
+            player_score = 0
+        dealer_score = self.font.render(f"Dealer score: {dealer_score}", 1, (0, 0, 0))
+        player_score = self.font.render(f"Player score: {player_score}", 1, (0, 0, 0))
+        GameParams.screen.blit(dealer_score, (540, 20))
+        GameParams.screen.blit(player_score, (550, 440))
+
     def draw(self):
         GameParams.screen.blit(GameParams.game_background, (0, 0))  # Background
 
@@ -173,6 +190,7 @@ class Game:
 
         self.draw_player_cards()
         self.draw_dealer_cards()
+        self.draw_score()
 
         self.draw_captions()
         if len(self.captions) == 0:
