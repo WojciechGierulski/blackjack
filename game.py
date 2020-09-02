@@ -84,7 +84,6 @@ class Game:
         self.functions = ActionFunctions()
         self.resume_buttons = True
         self.dealer_turn = False
-        self.captions = []
         self.moving_chips = []
         self.bet = 0
         self.player = player
@@ -191,22 +190,6 @@ class Game:
         self.draw_player_cards()
         self.draw_dealer_cards()
         self.draw_score()
-
-        self.draw_captions()
-        if len(self.captions) == 0:
-            self.resume_buttons = True
-
-    def draw_captions(self):
-        for caption in self.captions:
-            if caption[2] == 0:
-                if caption[3]:  # reset == True
-                    self.functions.reset()
-                    self.chip_stack.draw_first_time(self.player.cash)
-                    self.reset()
-                self.captions.remove(caption)
-            GameParams.screen.blit(caption[0], caption[1])
-            caption[2] -= 1
-            break
 
     def reset(self):
         self.bet = 0
