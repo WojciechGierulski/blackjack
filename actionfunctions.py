@@ -22,14 +22,6 @@ class ActionFunctions:
         self.able_to_stay = False
         self.able_to_bet = True
 
-    def draw_caption(self, game, text, seconds=1.5, reset=False):
-        game.resume_buttons = False
-        text1 = self.font.render(text, 1, (0, 0, 255))
-        game.captions.append([text1, (int(
-            GameParams.size[0] / 2 - text1.get_width() / 2),
-                                      int(GameParams.size[1] / 2) - text1.get_height() / 2),
-                              (60 * seconds), reset])
-
     def bet(self, game, value):
         if self.able_to_bet:
             self.dealed = False
@@ -50,11 +42,14 @@ class ActionFunctions:
                     game.chip_stack.backs_cords.pop()
 
     def bust(self, game, seconds=1.5):
-        self.draw_caption(game, "BUST!", seconds, True)
+        self.wait_for_key()
+        game.reset()
+
 
     def blackjack(self, game, seconds=1.5):
-        self.draw_caption(game, "BLACKJACK!", seconds, True)
         game.player.cash += game.bet * 2.5
+        self.wait_for_key()
+        game.reset()
 
     def hit(self, game):
         print(game.all_cards.cards_counter)
@@ -109,3 +104,13 @@ class ActionFunctions:
         self.actions = {"Hit": self.hit, "Stay": self.stay, "Deal": self.deal, "Bet": self.bet}
         self.player_card_nr = 0
         self.dealer_card_nr = 0
+
+    @staticmethod
+    def wait_for_key():
+        run =True
+        while run:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                    run = False
+                elif event.type == pygame.QUIT:
+                    pygame.quit()
