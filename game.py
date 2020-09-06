@@ -6,7 +6,7 @@ from game_params import GameParams, cursor_in_rect
 from menu import Button, GameButton, BetButton
 import random
 from dealerturn import DealerTurn
-from counting import determine_score
+from counting import count_scores
 
 
 class Stack:
@@ -77,12 +77,14 @@ class Game:
     chip_stack_cords = (0 + 30, GameParams.size[1] / 2 - 50)
 
     font = pygame.font.SysFont("comicsans", 33)
+    caption_font = pygame.font.SysFont("comicsans", 150)
+    score_font = pygame.font.SysFont("comicsans", 50)
 
     resume_time = 0
 
     def __init__(self, player, dealer, all_cards):
         self.functions = ActionFunctions()
-        self.resume_buttons = True
+        self.player_turn = True
         self.dealer_turn = False
         self.moving_chips = []
         self.bet = 0
@@ -115,6 +117,18 @@ class Game:
             self.dealer_cards_space.append(cords_dealer[:])
             cords_dealer[0] += 0.8 * CardsDatabase.size[0]
             cords_player[0] += 0.8 * CardsDatabase.size[0]
+
+    def wait_for_button(self, caption):
+        txt = self.caption_font.render(f"{caption}", 1, (255, 0, 0))
+        GameParams.screen.blit(txt, (180, 180))
+        pygame.display.update()
+        run = True
+        while run:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                elif event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
+                    run = False
 
     def check_pressed(self, events):
         pressed = None
@@ -154,21 +168,12 @@ class Game:
             for card in self.dealer.additional_cards:
                 card.draw()
 
-    def draw_score(self):
-        try:
-            if self.dealer.hidden_card_is_visible:
-                dealer_score = determine_score(
-                    [self.dealer.visible_card, self.dealer.hidden_card] + self.dealer.additional_cards)
-            else:
-                dealer_score = determine_score([self.dealer.visible_card])
-            player_score = determine_score([self.player.card1, self.player.card2] + self.player.additional_cards)
-        except:
-            dealer_score = 0
-            player_score = 0
-        dealer_score = self.font.render(f"Dealer score: {dealer_score}", 1, (0, 0, 0))
-        player_score = self.font.render(f"Player score: {player_score}", 1, (0, 0, 0))
-        GameParams.screen.blit(dealer_score, (540, 20))
-        GameParams.screen.blit(player_score, (550, 440))
+    def draw_counter(self):
+        pl, dl = count_scores(self)
+        pl = self.score_font.render(f"Score: {pl}", 1, (0, 0, 0))
+        dl = self.score_font.render(f"Score: {dl}", 1, (0, 0, 0))
+        GameParams.screen.blit(dl, (560, 20))
+        GameParams.screen.blit(pl, (560, 430))
 
     def draw(self):
         GameParams.screen.blit(GameParams.game_background, (0, 0))  # Background
@@ -189,7 +194,9 @@ class Game:
 
         self.draw_player_cards()
         self.draw_dealer_cards()
-        self.draw_score()
+        self.draw_counter()
+
+        pygame.display.update()
 
     def reset(self):
         self.bet = 0
@@ -197,6 +204,7 @@ class Game:
         self.dealer.reset()
         self.functions.reset()
         self.moving_chips = []
+        self.player_turn = True
 
     def run_game(self):
         self.all_cards.reset()
@@ -213,8 +221,7 @@ class Game:
                     sys.exit()
             if self.dealer_turn:
                 DealerTurn.turn(self)
-            if self.resume_buttons:
+            if self.player_turn:
                 button_text = self.check_pressed(events)
             self.draw()
-            pygame.display.update()
         return button_text

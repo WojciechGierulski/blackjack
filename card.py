@@ -34,6 +34,7 @@ class Card:
     base_vel = 11
 
     def __init__(self, name):
+        self.ready = False
         self.vel_determined = False
         self.vel = [0, 0]
         self.cords = [0, 0]

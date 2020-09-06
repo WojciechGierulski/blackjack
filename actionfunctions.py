@@ -22,6 +22,7 @@ class ActionFunctions:
         self.able_to_stay = False
         self.able_to_bet = True
 
+
     def bet(self, game, value):
         if self.able_to_bet:
             self.dealed = False
@@ -41,14 +42,29 @@ class ActionFunctions:
                     game.moving_chips.append(Chip(list(game.chip_stack.backs_cords[-1]), [x, y]))
                     game.chip_stack.backs_cords.pop()
 
-    def bust(self, game, seconds=1.5):
-        self.wait_for_key()
+    def bust(self, game):
+        cd = 60
+        while cd > 0:
+            cd -= 1
+            game.draw()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+        game.player_turn = False
+        game.wait_for_button("You lose!")
         game.reset()
 
-
-    def blackjack(self, game, seconds=1.5):
+    def blackjack(self, game):
+        cd = 60
+        while cd > 0:
+            cd -= 1
+            game.draw()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+        game.player_turn = False
+        game.wait_for_button("Blackjack!")
         game.player.cash += game.bet * 2.5
-        self.wait_for_key()
         game.reset()
 
     def hit(self, game):
@@ -66,6 +82,7 @@ class ActionFunctions:
 
     def stay(self, game):
         if self.able_to_stay:
+            game.player_turn = False
             self.able_to_hit = False
             self.able_to_stay = False
             game.dealer_turn = True
@@ -104,13 +121,3 @@ class ActionFunctions:
         self.actions = {"Hit": self.hit, "Stay": self.stay, "Deal": self.deal, "Bet": self.bet}
         self.player_card_nr = 0
         self.dealer_card_nr = 0
-
-    @staticmethod
-    def wait_for_key():
-        run =True
-        while run:
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
-                    run = False
-                elif event.type == pygame.QUIT:
-                    pygame.quit()
