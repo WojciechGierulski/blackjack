@@ -14,6 +14,7 @@ def count_score(cards):
 
 
 def determine_score(cards):
+    # right one
     if 0 not in cards:
         score = count_score(cards)
         if score <= 21:
